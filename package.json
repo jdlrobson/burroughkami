@@ -5,6 +5,7 @@
     "express": "^4.14.1"
   },
   "dependencies": {
+    "cut-up-method-js": "^1.0.0",
     "firstline": "^1.2.1",
     "walk": "^2.3.9"
   }

@@ -1,5 +1,6 @@
 var express = require('express')
 var firstline = require('firstline');
+var cutup = require('cut-up-method-js');
 var fs = require('fs')
 var walk = require('walk')
 var app = express()
@@ -74,22 +75,6 @@ function randomNote() {
     var note = notes[parseInt(Math.random() * notes.length - 1, 10)];
     return openNote(note.id);
   });
-}
-
-function shuffle(words) {
-	var newText = [], i, phraseLength;
-	while ( words.length ) {
-		i = parseInt( Math.random() * words.length -1, 10 );
-		phraseLength = parseInt( Math.random() * 9, 10 );
-		newText = newText.concat(words.splice(i, phraseLength));
-	}
-	return newText;
-}
-
-function cutup(text) {
-	var words = text.replace(/\n\r/g, ' ').split(' ');
-	var cut = shuffle(words);
-  return cut.join(' ').toLowerCase();
 }
 
 function combineNotes(num, sources) {

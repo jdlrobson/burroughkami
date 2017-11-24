@@ -184,11 +184,12 @@ app.post('/cutup', function (req, res) {
 
 app.get('/', function (req, res) {
   var list = [
-    '<a href="/notes">notes</a>'
+    '<a href="/notes">List all your notes</a>'
   ];
 
   res.send(doc(
-    `${form}<hr/>${list}`
+    `<h1>Welcome to Burroughkami</h1>
+    ${form}<hr/>${list}`
   ));
 })
 

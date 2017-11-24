@@ -1,0 +1,13 @@
+.note {
+  height: 100%;
+  line-height: 2;
+}
+textarea {
+  height: 30%;
+  border: 0;
+  width: 100%;
+  font-family: courier;
+  font-size: 1em;
+	border-bottom: solid 1px #aaa;
+	margin-bottom: 8px;
+}

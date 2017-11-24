@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "body-parser": "^1.16.0",
+    "crypto": "0.0.3",
+    "express": "^4.14.1"
+  },
+  "dependencies": {
+    "walk": "^2.3.9"
+  }
+}

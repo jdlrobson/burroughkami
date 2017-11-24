@@ -144,8 +144,12 @@ app.get('/notes/', function (req, res) {
 app.post('/post', function (req, res) {
   var text = req.body.text;
   var hash = crypto.createHash('md5').update(text).digest('hex');
-  var dir = `${path.resolve(__dirname)}/notes/${hash}`;
+  var base = `${path.resolve(__dirname)}/notes`;
+  var dir = `${base}/${hash}`;
 
+  if (!fs.existsSync(base)){
+      fs.mkdirSync(base);
+  }
   if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
   }

@@ -83,20 +83,22 @@ function cutup(text) {
   return cut.join(' ').toLowerCase();
 }
 
-function combineNotes(num) {
-	var input = '';
-	var sources = [];
+function combineNotes(num, sources) {
+  var input = '';
+  sources = sources || [];
   return randomNote().then((note) => {
-    input += note.text;
-		sources.push( note.id );
-		if ( num === 0 ) {
-			return [ input, sources ];
-		} else {
-			return combineNotes(num-1).then((val) => {
-				return [ input + val[0], sources.concat(val[1]) ];
-			});
-		}
-	});
+    if ( sources.indexOf( note.id ) === -1 ) {
+      input += note.text;
+      sources.push( note.id );
+    }
+   if ( num === 0 ) {
+      return [ input, sources ];
+    } else {
+      return combineNotes(num-1, sources).then((val) => {
+        return [ input + val[0], sources ];
+      });
+    }
+  });
 }
 
 app.post('/cutup', function (req, res) {

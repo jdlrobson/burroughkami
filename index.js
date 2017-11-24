@@ -30,10 +30,11 @@ loadNotes();
 var actionUrl = '/post'
 var cutupForm = `
 <form action="/cutup" method="post">
-  <input type="submit" value="Cutup" />
+  <input type="submit" value="Cutup several of your notes" />
 </form>`;
 
 var form = `
+<h2>Create new note</h2>
 <form action="${actionUrl}" method="post">
   <textarea name="text"></textarea>
   <input type="submit" value="Save note" />
@@ -102,7 +103,9 @@ app.post('/cutup', function (req, res) {
   // take 3 notes as input
   combineNotes(4).then((input)=> {
 		var links = input[1].map((id) => `<a href="/notes/${id}">${id}</a>`).join(', ');
-    res.send(doc(`<div>From ${links}:</div><textarea class="note">${cutup(input[0])}</textarea>`));
+    res.send(doc(
+      `<h1>Combo cut-up</h1>
+<div>This is a cutup of the combined text of the notes ${links}:</div><textarea class="note">${cutup(input[0])}</textarea>`));
   });
 })
 
@@ -112,6 +115,7 @@ app.get('/notes/:note', function (req, res) {
     res.send(
       doc(
         `<a href="/notes">back to notes</a> <a href="/notes/${id}/cutup">cutup this note</a><hr/>
+        <h2>Note ${id}</h2>
         <textarea class="note" readonly>${note.text}</textarea>`
       )
     );
@@ -121,10 +125,12 @@ app.get('/notes/:note', function (req, res) {
 })
 
 app.get('/notes/:note/cutup', function (req, res) {
-  openNote(req.params.note).then((note) => {
+  var id = req.params.note;
+  openNote(id).then((note) => {
     res.send(
       doc(
         `<a href="/notes">notes</a><hr/>
+        <h2>Cut-up of ${id}</h2>
         <textarea class="note" readonly>${cutup(note.text)}</textarea>`
       )
     ).catch(()=>{
@@ -138,7 +144,12 @@ app.get('/notes/', function (req, res) {
     return `<li><a href="/notes/${note.id}">${note.title}</a></li>`;
   }).join(' ');
 
-  res.send(doc(`${form}${cutupForm}<hr/><ul>${list}</ul>`));
+  res.send(doc(
+    `${form}<hr/>
+<h2>All your notes</h2>
+${cutupForm}
+<ul>${list}</ul>`
+  ));
 })
 
 app.post('/post', function (req, res) {
@@ -174,7 +185,9 @@ app.get('/', function (req, res) {
     '<a href="/notes">notes</a>'
   ];
 
-  res.send(doc(`${form}<hr/>${list}`));
+  res.send(doc(
+    `${form}<hr/>${list}`
+  ));
 })
 
 app.listen(3000, function () {

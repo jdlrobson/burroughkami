@@ -1,4 +1,5 @@
 var express = require('express')
+var firstline = require('firstline');
 var fs = require('fs')
 var walk = require('walk')
 var app = express()
@@ -14,12 +15,18 @@ app.use( bodyParser.urlencoded( {     // to support URL-encoded bodies
 var notes;
 function loadNotes() {
   return new Promise( (resolve, reject) => {
+    var pathToNotes = `${path.resolve(__dirname)}/notes/`;
     notes = [];
-    walker = walk.walk(`${path.resolve(__dirname)}/notes/`);
+    walker = walk.walk(pathToNotes);
 
     walker.on('directory', (root, fileStats, next) => {
-      notes.push( { id: fileStats.name, title: `${fileStats.name}` } );
-      next();
+      firstline(`${pathToNotes}${fileStats.name}/1.txt`).then((title) => {
+        title = title.trim();
+        notes.push( { id: fileStats.name, title: title || '{Untitled}' } );
+        next();
+      }).catch(() => {
+        next();
+      });
     }).on('end', () => {
       resolve(notes);
     });
@@ -55,7 +62,9 @@ function openNote(id) {
       if (err) {
         throw 'Bah';
       }
-      resolve({ id: id, text: data.toString() });
+      firstline(dir).then((title) => {
+        resolve({ id: id, text: data.toString(), title: title });
+      }).catch(() => {});
     });
   });
 }
@@ -85,11 +94,11 @@ function cutup(text) {
 
 function combineNotes(num, sources) {
   var input = '';
-  sources = sources || [];
+  sources = sources || {};
   return randomNote().then((note) => {
-    if ( sources.indexOf( note.id ) === -1 ) {
+    if ( !sources[note.id] ) {
       input += note.text;
-      sources.push( note.id );
+      sources[ note.id ] = note.title;
     }
    if ( num === 0 ) {
       return [ input, sources ];
@@ -104,7 +113,9 @@ function combineNotes(num, sources) {
 app.post('/cutup', function (req, res) {
   // take 3 notes as input
   combineNotes(4).then((input)=> {
-		var links = input[1].map((id) => `<a href="/notes/${id}">${id}</a>`).join(', ');
+    var myNotes = input[1];
+    var links = Object.keys(myNotes).
+      map((id) => `<a href="/notes/${id}">${myNotes[id]}</a>`).join(', ');
     res.send(doc(
       `<h1>Combo cut-up</h1>
 <div>This is a cutup of the combined text of the notes ${links}:</div><textarea class="note">${cutup(input[0])}</textarea>`));
@@ -114,10 +125,11 @@ app.post('/cutup', function (req, res) {
 app.get('/notes/:note', function (req, res) {
   var id = req.params.note;
   openNote(id).then((note) => {
+    console.l
     res.send(
       doc(
         `<a href="/notes">back to notes</a> <a href="/notes/${id}/cutup">cutup this note</a><hr/>
-        <h2>Note ${id}</h2>
+        <h2>${note.title}</h2>
         <textarea class="note" readonly>${note.text}</textarea>`
       )
     );
@@ -132,7 +144,7 @@ app.get('/notes/:note/cutup', function (req, res) {
     res.send(
       doc(
         `<a href="/notes">notes</a><hr/>
-        <h2>Cut-up of ${id}</h2>
+        <h2>Cut-up of ${note.title}</h2>
         <textarea class="note" readonly>${cutup(note.text)}</textarea>`
       )
     ).catch(()=>{
